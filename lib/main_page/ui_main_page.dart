@@ -28,18 +28,24 @@ class DiscoverPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        Container(color: Colors.grey.shade300),
-        ClipPath(
-          clipper: _CircularClipper(),
+        Container(color: Colors.grey.shade200),
+        Positioned(
+          bottom: 80,
+          left: -250,
           child: Container(
-            decoration: const BoxDecoration(color: Colors.white),
+            height: 900,
+            width: 900,
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+            ),
           ),
         ),
         Scaffold(
           backgroundColor: Colors.transparent,
           body: BlocBuilder<MainPageBloc, MainPageState>(
             builder: (context, state) {
-              if (state is MainPageInitial) {
+              if (state is MainPageBaseState) {
                 return IndexedStack(
                   index: state.indexNavBar,
                   children: [
@@ -57,32 +63,33 @@ class DiscoverPage extends StatelessWidget {
           ),
           bottomNavigationBar: BlocBuilder<MainPageBloc, MainPageState>(
             builder: (context, state) {
-              if (state is MainPageInitial) {
+              if (state is MainPageBaseState) {
                 return BottomNavigationBar(
                   elevation: 0,
                   type: BottomNavigationBarType.fixed,
+                  backgroundColor: Colors.grey.shade200,
                   showSelectedLabels: false,
                   showUnselectedLabels: false,
-                  items: const <BottomNavigationBarItem>[
-                    BottomNavigationBarItem(
+                  items: <BottomNavigationBarItem>[
+                    const BottomNavigationBarItem(
                       icon: Icon(Icons.home_outlined),
-                      label: 'Home',
+                      label: '',
                     ),
-                    BottomNavigationBarItem(
+                    const BottomNavigationBarItem(
                       icon: Icon(Icons.favorite_border_outlined),
-                      label: 'Business',
+                      label: '',
                     ),
-                    BottomNavigationBarItem(
+                    const BottomNavigationBarItem(
                       icon: Icon(Icons.location_on_outlined),
-                      label: 'School',
+                      label: '',
                     ),
                     BottomNavigationBarItem(
-                      icon: Icon(Icons.shopping_cart_outlined),
-                      label: 'School',
+                      icon: _IconWithCounter(count: state.myBagList.length),
+                      label: '',
                     ),
-                    BottomNavigationBarItem(
+                    const BottomNavigationBarItem(
                       icon: Icon(Icons.person_outlined),
-                      label: 'School',
+                      label: '',
                     ),
                   ],
                   currentIndex: state.indexNavBar,
@@ -100,22 +107,43 @@ class DiscoverPage extends StatelessWidget {
   }
 }
 
-class _CircularClipper extends CustomClipper<Path> {
-  @override
-  Path getClip(Size size) {
-    double height = size.height;
-    double width = size.width;
-    const h = 200;
-    var path = Path();
-    path.lineTo(0, height - h);
-    path.quadraticBezierTo(width / 2, height - 100, width, height - h);
-    path.lineTo(width, 0);
-    path.close();
-    return path;
-  }
+class _IconWithCounter extends StatelessWidget {
+  final int count;
+
+  const _IconWithCounter({required this.count});
 
   @override
-  bool shouldReclip(covariant CustomClipper oldClipper) {
-    return false;
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 32,
+      width: 32,
+      child: Stack(
+        children: [
+          if (count > 0)
+            Positioned(
+              right: 0,
+              top: 0,
+              child: Container(
+                padding: const EdgeInsets.all(4),
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.red,
+                ),
+                child: Text(
+                  count.toString(),
+                  style: const TextStyle(
+                    fontSize: 10,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+          const Positioned(
+            bottom: 3,
+            child: Icon(Icons.shopping_cart_outlined),
+          ),
+        ],
+      ),
+    );
   }
 }

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:test_animation/main_page/ui_main_page.dart';
 
 void main() {
@@ -11,13 +13,20 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
       theme: ThemeData(
         appBarTheme: const AppBarTheme(
           color: Colors.transparent,
           elevation: 0,
+          systemOverlayStyle: SystemUiOverlayStyle(
+            statusBarBrightness: Brightness.light,
+            statusBarIconBrightness: Brightness.dark,
+            statusBarColor: Colors.transparent,
+            systemStatusBarContrastEnforced: false,
+          ),
+          foregroundColor: Colors.white,
         ),
         primarySwatch: Colors.lime,
+        fontFamily: GoogleFonts.josefinSans().fontFamily,
       ),
       home: const DiscoverPageProvider(),
     );

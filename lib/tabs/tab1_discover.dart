@@ -2,12 +2,15 @@ import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:test_animation/common/widgets/image_png_with_shadow.dart';
 import 'package:test_animation/detail_page.dart';
 import 'package:test_animation/main_page/bloc/main_page_bloc.dart';
 import 'package:test_animation/main_page/m_main_page.dart';
 
 const oneDegree = pi / 180;
+
+MainPageBloc _bloc(BuildContext context) => BlocProvider.of(context);
 
 class Tab1Discover extends StatelessWidget {
   final PageController pageController = PageController(viewportFraction: 0.7);
@@ -16,15 +19,17 @@ class Tab1Discover extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final appBarTitleStyle = Theme.of(context).textTheme.headlineSmall?.copyWith(
+          color: Colors.black,
+          fontWeight: FontWeight.w700,
+          fontSize: 32,
+        );
     return Column(
       children: [
         AppBar(
-          title: const Text(
+          title: Text(
             'Discover',
-            style: TextStyle(
-              color: Colors.black,
-              fontWeight: FontWeight.w700,
-            ),
+            style: appBarTitleStyle,
           ),
           actions: [
             _ActionIcon(
@@ -48,6 +53,7 @@ class Tab1Discover extends StatelessWidget {
             ),
           ],
         ),
+        const SizedBox(height: 12),
         SizedBox(
           height: 24,
           child: ListView(
@@ -127,7 +133,14 @@ class _MainCardCarouselState extends State<_MainCardCarousel> {
             final cardData = widget.cardList[index];
             return GestureDetector(
               onTap: () {
-                Navigator.of(context).push(MaterialPageRoute(builder: (_) => DetailPage(cardData)));
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => BlocProvider.value(
+                      value: _bloc(context),
+                      child: DetailPage(cardData),
+                    ),
+                  ),
+                );
               },
               child: _CardItemTransform(
                 data: cardData,
@@ -152,7 +165,7 @@ class _LowerCarousel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 280,
+      height: 260,
       child: Column(
         children: [
           const SizedBox(height: 16),
@@ -197,7 +210,7 @@ class _LowerCarousel extends StatelessWidget {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            data.cost,
+                            '\$${data.cost}',
                             style: Theme.of(context).textTheme.bodyLarge,
                           ),
                         ],
@@ -319,7 +332,7 @@ class _CardItem extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  data.cost,
+                  '\$${data.cost}',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         color: Colors.white,
                         fontWeight: FontWeight.w500,

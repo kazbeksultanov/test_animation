@@ -4,11 +4,15 @@ abstract class MainPageState extends Equatable {
   const MainPageState();
 }
 
-class MainPageInitial extends MainPageState {
+class MainPageBaseState extends MainPageState {
   final int indexNavBar;
+  final List<MyBagItem> myBagList;
 
-  const MainPageInitial({required this.indexNavBar});
+  const MainPageBaseState({
+    required this.indexNavBar,
+    required this.myBagList,
+  });
 
   @override
-  List<Object> get props => [indexNavBar];
+  List<Object> get props => [indexNavBar, myBagList];
 }
