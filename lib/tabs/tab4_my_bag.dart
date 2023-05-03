@@ -5,6 +5,10 @@ import 'package:test_animation/main_page/m_main_page.dart';
 
 MainPageBloc _bloc(BuildContext context) => BlocProvider.of(context);
 
+const _cardHeight = 120.0;
+const _cardSpace = 28.0;
+const _animationInMillSec = 1000;
+
 class Tab4MyBag extends StatelessWidget {
   const Tab4MyBag({super.key});
 
@@ -24,9 +28,9 @@ class Tab4MyBag extends StatelessWidget {
     return BlocBuilder<MainPageBloc, MainPageState>(
       builder: (context, state) {
         if (state is MainPageBaseState) {
-          final itemList = state.myBagList;
+          final itemList = state.myBagListSet.where((e) => e.state != MyBagItemState.remove);
           final totalCost = itemList.isNotEmpty
-              ? '\$${itemList.map((e) => e.cardItemData.cost).toList().reduce((v, e) => v + e)}'
+              ? '\$${itemList.map((e) => e.cardItemData.cost * e.count).toList().reduce((v, e) => v + e)}'
               : r'$0';
           return Scaffold(
             backgroundColor: Colors.transparent,
@@ -44,14 +48,8 @@ class Tab4MyBag extends StatelessWidget {
               children: [
                 const SizedBox(height: 1, child: Divider(color: Colors.grey)),
                 Expanded(
-                  child: ListView.separated(
-                    physics: const BouncingScrollPhysics(),
-                    padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
-                    itemCount: itemList.length,
-                    itemBuilder: (BuildContext context, int index) =>
-                        _CardItemUi(data: itemList[index]),
-                    separatorBuilder: (BuildContext context, int index) =>
-                        const SizedBox(height: 28),
+                  child: ClipRect(
+                    child: _AnimatedListView(state),
                   ),
                 ),
                 const SizedBox(height: 1, child: Divider(color: Colors.grey)),
@@ -66,10 +64,365 @@ class Tab4MyBag extends StatelessWidget {
   }
 }
 
+class _AnimatedListView extends StatelessWidget {
+  final MainPageBaseState state;
+
+  const _AnimatedListView(this.state);
+
+  static const transitionStepDelayMilSec = 100;
+
+  @override
+  Widget build(BuildContext context) {
+    final allList = state.myBagListSet.where((e) => e.state != MyBagItemState.toBeAdd).toList();
+    final addList = state.myBagListSet.where((e) => e.state == MyBagItemState.add).toList();
+    final removingItemIndex =
+        state.myBagListSet.indexWhere((e) => e.state == MyBagItemState.remove);
+    final isRemoving = removingItemIndex >= 0;
+
+    final diffOnAdd = allList.length - addList.length;
+    final delayBeforeAddItemsAppear =
+        (diffOnAdd) > 0 ? diffOnAdd * transitionStepDelayMilSec + _animationInMillSec ~/ 2 : 0;
+    final numCardToSlideOnAdd = addList.length;
+    return ListView.separated(
+      physics: const BouncingScrollPhysics(),
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      itemCount: allList.length,
+      itemBuilder: (BuildContext context, int index) {
+        final item = allList[index];
+        int millisecondsDelay = 0;
+
+        if (addList.isNotEmpty && item.state != MyBagItemState.add) {
+          millisecondsDelay = transitionStepDelayMilSec * ((allList.length - index));
+        } else if (isRemoving) {
+          millisecondsDelay = transitionStepDelayMilSec * (index);
+        }
+
+        final actualNumCardSlid = isRemoving && removingItemIndex < index
+            ? -1
+            : item.state == MyBagItemState.set
+                ? numCardToSlideOnAdd
+                : 0;
+        final translateDelay =
+            isRemoving ? millisecondsDelay + _animationInMillSec ~/ 2 : millisecondsDelay;
+        final appearDelay = item.state == MyBagItemState.add ? delayBeforeAddItemsAppear : 0;
+        debugPrint('state: ${item.state}, '
+            'index:$index, '
+            'millisecondsDelay:$millisecondsDelay, '
+            'delayBeforeAddItemsAppear:$delayBeforeAddItemsAppear, '
+            'removingItemIndex:$removingItemIndex, '
+            'actualNumCardSlid:$actualNumCardSlid');
+        return _CardItemUi(
+          data: item,
+          numCardToSlide: actualNumCardSlid,
+          translateDelay: translateDelay,
+          itemState: item.state,
+          reset: state.reset,
+          appearDelay: appearDelay,
+        );
+      },
+      separatorBuilder: (BuildContext context, int index) => const SizedBox(height: _cardSpace),
+    );
+  }
+}
+
 class _CardItemUi extends StatelessWidget {
   final MyBagItem data;
+  final MyBagItemState itemState;
+  final int numCardToSlide;
+  final int translateDelay;
+  final int appearDelay;
+  final bool reset;
 
-  const _CardItemUi({required this.data});
+  const _CardItemUi({
+    required this.data,
+    required this.itemState,
+    required this.numCardToSlide,
+    required this.translateDelay,
+    required this.appearDelay,
+    required this.reset,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    double? end;
+    double? begin;
+    if (itemState == MyBagItemState.add) {
+      begin = 0;
+      end = 1;
+    } else if (itemState == MyBagItemState.remove) {
+      begin = 1;
+      end = 0;
+    } else {
+      begin = 1;
+      end = 1;
+    }
+
+    final duration = reset ? Duration.zero : const Duration(milliseconds: _animationInMillSec);
+    if (reset) {
+      return _CardBase(
+        begin: begin,
+        end: end,
+        duration: duration,
+        data: data,
+        delayBeforeAppear: Duration(milliseconds: appearDelay),
+      );
+    } else {
+      final double yOffsetForImmediateTranslate =
+          numCardToSlide < 0 ? 0 : -(_cardHeight + _cardSpace) * numCardToSlide.toDouble();
+
+      return Transform.translate(
+        offset: Offset(0, yOffsetForImmediateTranslate),
+        child: FutureBuilder(
+          key: Key(data.cardItemData.tagBox),
+          initialData: 0,
+          future: Future.delayed(
+            Duration(milliseconds: translateDelay),
+            () => numCardToSlide,
+          ),
+          builder: (BuildContext context, AsyncSnapshot<int> snapshot) {
+            final shift = (_cardHeight + _cardSpace) * snapshot.data!.toDouble();
+            return TweenAnimationBuilder<double>(
+              duration: duration,
+              tween: Tween<double>(end: shift),
+              curve: Curves.easeOutExpo,
+              child: _CardBase(
+                begin: begin,
+                end: end,
+                duration: duration,
+                data: data,
+                delayBeforeAppear: Duration(milliseconds: appearDelay),
+              ),
+              builder: (_, value, child) {
+                return Transform.translate(
+                  offset: Offset(0, value),
+                  child: child,
+                );
+              },
+            );
+          },
+        ),
+      );
+    }
+  }
+}
+
+class _CardBase extends StatelessWidget {
+  final double? begin;
+  final double? end;
+  final Duration delayBeforeAppear;
+  final Duration duration;
+  final MyBagItem data;
+
+  const _CardBase({
+    this.begin,
+    this.end,
+    required this.duration,
+    required this.delayBeforeAppear,
+    required this.data,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final screeWidth = MediaQuery.of(context).size.width / 2.5;
+    final modelText = Text(
+      data.cardItemData.model,
+      style: const TextStyle(
+        fontSize: 14,
+        fontWeight: FontWeight.w600,
+      ),
+    );
+    final costText = Text(
+      '\$${data.cardItemData.cost}',
+      style: const TextStyle(
+        fontSize: 22,
+        fontWeight: FontWeight.w900,
+      ),
+    );
+    return FutureBuilder<double>(
+      initialData: begin!,
+      future: Future.delayed(delayBeforeAppear, () => end!),
+      builder: (BuildContext context, AsyncSnapshot<double> snapshot) {
+        final end = snapshot.data;
+        return SizedBox(
+          height: _cardHeight,
+          child: Row(
+            mainAxisSize: MainAxisSize.max,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              _ScaleAnimation(
+                begin: begin,
+                end: end,
+                duration: duration,
+                assetUrl: data.cardItemData.assetUrl,
+              ),
+              const SizedBox(width: 42),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  FutureBuilder<double>(
+                    initialData: begin,
+                    future: Future.delayed(
+                      const Duration(milliseconds: 0),
+                      () => end!,
+                    ),
+                    builder: (BuildContext context, AsyncSnapshot<double> snapshot) {
+                      return _FadeTranslateAnimation(
+                        duration: duration,
+                        begin: begin,
+                        end: snapshot.data!,
+                        screeWidth: screeWidth,
+                        child: modelText,
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 12),
+                  FutureBuilder<double>(
+                    initialData: begin,
+                    future: Future.delayed(
+                      const Duration(milliseconds: 120),
+                      () => end!,
+                    ),
+                    builder: (BuildContext context, AsyncSnapshot<double> snapshot) {
+                      return _FadeTranslateAnimation(
+                        duration: duration,
+                        begin: begin,
+                        end: snapshot.data!,
+                        screeWidth: screeWidth,
+                        child: costText,
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 12),
+                  FutureBuilder<double>(
+                    initialData: begin,
+                    future: Future.delayed(
+                      const Duration(milliseconds: 170),
+                      () => end!,
+                    ),
+                    builder: (BuildContext context, AsyncSnapshot<double> snapshot) {
+                      return _FadeTranslateAnimation(
+                        duration: duration,
+                        begin: begin,
+                        end: snapshot.data!,
+                        screeWidth: screeWidth,
+                        child: _AddRemoveCount(data),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 8),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _ScaleAnimation extends StatelessWidget {
+  final Duration duration;
+  final double? begin;
+  final double? end;
+  final String assetUrl;
+
+  const _ScaleAnimation({
+    required this.duration,
+    required this.begin,
+    required this.end,
+    required this.assetUrl,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: _cardHeight,
+      width: 150,
+      child: TweenAnimationBuilder<double>(
+        duration: duration,
+        tween: Tween<double>(begin: begin, end: end),
+        curve: end == 1 ? Curves.elasticOut : Curves.easeInToLinear,
+        builder: (_, value, __) {
+          return Stack(
+            children: [
+              Positioned(
+                left: 16,
+                bottom: 0,
+                child: Transform.scale(
+                  scale: value,
+                  child: Container(
+                    height: 100,
+                    width: 110,
+                    decoration: BoxDecoration(
+                      color: Colors.blueGrey.shade100,
+                      borderRadius: const BorderRadius.all(Radius.circular(36)),
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                left: 16,
+                right: 0,
+                top: -20,
+                child: SizedBox(
+                  height: 150,
+                  width: 150,
+                  child: Transform.scale(
+                    scale: value,
+                    child: Image.asset(assetUrl),
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _FadeTranslateAnimation extends StatelessWidget {
+  final Duration duration;
+  final double? begin;
+  final double? end;
+  final double screeWidth;
+  final Widget child;
+
+  const _FadeTranslateAnimation({
+    required this.duration,
+    required this.begin,
+    required this.end,
+    required this.screeWidth,
+    required this.child,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return TweenAnimationBuilder<double>(
+      duration: duration,
+      tween: Tween<double>(begin: begin, end: end),
+      curve: Curves.linearToEaseOut,
+      child: child,
+      builder: (_, value, childR) {
+        final v = 1 - value;
+        final offset = Offset(screeWidth * v, 0);
+        return Opacity(
+          opacity: value,
+          child: Transform.translate(
+            offset: offset,
+            child: childR,
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _AddRemoveCount extends StatelessWidget {
+  final MyBagItem data;
+
+  const _AddRemoveCount(this.data);
 
   @override
   Widget build(BuildContext context) {
@@ -79,91 +432,29 @@ class _CardItemUi extends StatelessWidget {
       color: Colors.grey.shade900,
     );
     return Row(
-      mainAxisSize: MainAxisSize.max,
-      crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        SizedBox(
-          height: 120,
-          width: 150,
-          child: Stack(
-            children: [
-              Positioned(
-                left: 0,
-                bottom: 0,
-                child: Container(
-                  height: 100,
-                  width: 110,
-                  decoration: BoxDecoration(
-                    color: Colors.blueGrey.shade100,
-                    borderRadius: const BorderRadius.all(Radius.circular(36)),
-                  ),
-                ),
-              ),
-              Positioned(
-                right: 0,
-                top: -20,
-                child: SizedBox(
-                  height: 150,
-                  width: 150,
-                  child: Image.asset(data.cardItemData.assetUrl),
-                ),
-              ),
-            ],
+        InkWell(
+          onTap: () => _bloc(context).add(
+            OnChangeCountToMyBagItemTap(data.cardItemData.tagBox, isAdd: false),
+          ),
+          child: Container(
+            color: Colors.grey.shade200,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
+            child: Text('—', style: style),
           ),
         ),
         const SizedBox(width: 16),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              data.cardItemData.model,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              '\$${data.cardItemData.cost}',
-              style: const TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.w900,
-              ),
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                InkWell(
-                  onTap: () {
-                    _bloc(context).add(
-                      OnChangeCountToMyBagItemTap(data.cardItemData.tagBox, false),
-                    );
-                  },
-                  child: Container(
-                    color: Colors.grey.shade200,
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
-                    child: Text('—', style: style),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Text(data.count.toString(), style: style),
-                const SizedBox(width: 16),
-                InkWell(
-                  onTap: () {
-                    _bloc(context).add(
-                      OnChangeCountToMyBagItemTap(data.cardItemData.tagBox, true),
-                    );
-                  },
-                  child: Container(
-                    color: Colors.grey.shade200,
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
-                    child: Text('+', style: style),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-          ],
+        Text(data.count.toString(), style: style),
+        const SizedBox(width: 16),
+        InkWell(
+          onTap: () => _bloc(context).add(
+            OnChangeCountToMyBagItemTap(data.cardItemData.tagBox, isAdd: true),
+          ),
+          child: Container(
+            color: Colors.grey.shade200,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
+            child: Text('+', style: style),
+          ),
         ),
       ],
     );
@@ -235,59 +526,3 @@ class _AddToBagButton extends StatelessWidget {
     );
   }
 }
-
-// class _AnimatedCounter extends StatelessWidget {
-//   final int value;
-//   final TextStyle style;
-//
-//   const _AnimatedCounter({
-//     required this.value,
-//     required this.style,
-//   });
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     final styleR = DefaultTextStyle.of(context).style.merge(style);
-//     // Layout number "8" (probably the widest digit) to see its size
-//     final prototypeDigit = TextPainter(
-//       text: TextSpan(text: value.toString(), style: styleR),
-//       textDirection: TextDirection.ltr,
-//       textScaleFactor: MediaQuery.of(context).textScaleFactor,
-//     )..layout();
-//     print(prototypeDigit.size);
-//     return TweenAnimationBuilder(
-//       curve: Curves.linear,
-//       duration: const Duration(milliseconds: 100),
-//       tween: Tween<double>(end: prototypeDigit.size.height),
-//       builder: (BuildContext c, double? v, Widget? cc) {
-//         print(v);
-//         return SizedBox(
-//           height: prototypeDigit.height,
-//           width: prototypeDigit.width,
-//           child: Stack(
-//             children: [
-//               Positioned(
-//                 right: 0,
-//                 left: 0,
-//                 bottom: -(v ?? 0) + prototypeDigit.size.height,
-//                 child: Text(
-//                   value.toString(),
-//                   style: style,
-//                 ),
-//               ),
-//               Positioned(
-//                 right: 0,
-//                 left: 0,
-//                 bottom: -(v ?? 0),
-//                 child: Text(
-//                   value.toString(),
-//                   style: style,
-//                 ),
-//               ),
-//             ],
-//           ),
-//         );
-//       },
-//     );
-//   }
-// }

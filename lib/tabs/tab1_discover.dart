@@ -288,6 +288,8 @@ class _CardItem extends StatelessWidget {
         aspectRatio: 3 / 4,
         child: Hero(
           tag: data.tagBox,
+          transitionOnUserGestures: true,
+          flightShuttleBuilder: _flightShuttleBuilderContainer,
           child: Container(
             decoration: BoxDecoration(
               color: data.color,
@@ -354,6 +356,39 @@ class _CardItem extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _flightShuttleBuilderContainer(
+    BuildContext flightContext,
+    Animation<double> animation,
+    HeroFlightDirection flightDirection,
+    BuildContext fromHeroContext,
+    BuildContext toHeroContext,
+  ) {
+    final hBackground = (MediaQuery.of(fromHeroContext).size.height * 1.8) / 2.8;
+    final tw = flightDirection == HeroFlightDirection.push
+        ? Tween<double>(begin: 26, end: hBackground)
+        : Tween<double>(begin: hBackground, end: 26);
+    tw.animate(animation);
+    return TweenAnimationBuilder(
+      tween: tw,
+      duration: const Duration(milliseconds: 300),
+      builder: (_, value, __) {
+        return Container(
+          decoration: BoxDecoration(
+            color: data.color,
+            borderRadius: BorderRadius.all(Radius.circular(value)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 10,
+                spreadRadius: 1,
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

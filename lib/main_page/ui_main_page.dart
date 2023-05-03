@@ -47,7 +47,7 @@ class DiscoverPage extends StatelessWidget {
             builder: (context, state) {
               if (state is MainPageBaseState) {
                 return IndexedStack(
-                  index: state.indexNavBar,
+                  index: state.indexNavBar.toInt(),
                   children: [
                     Tab1Discover(),
                     const Tab2Favourite(),
@@ -84,7 +84,7 @@ class DiscoverPage extends StatelessWidget {
                       label: '',
                     ),
                     BottomNavigationBarItem(
-                      icon: _IconWithCounter(count: state.myBagList.length),
+                      icon: _IconWithCounter(count: state.myBagListSet.length),
                       label: '',
                     ),
                     const BottomNavigationBarItem(
@@ -92,9 +92,11 @@ class DiscoverPage extends StatelessWidget {
                       label: '',
                     ),
                   ],
-                  currentIndex: state.indexNavBar,
+                  currentIndex: state.indexNavBar.toInt(),
                   selectedItemColor: Colors.pink,
-                  onTap: (value) => _bloc(context).add(OnBottomNavTap(value)),
+                  onTap: (value) => _bloc(context).add(
+                    OnBottomNavTap(NavBarIndexExt.fromInt(value)),
+                  ),
                 );
               } else {
                 return const SizedBox();

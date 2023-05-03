@@ -5,7 +5,7 @@ abstract class MainPageEvent extends Equatable {
 }
 
 class OnBottomNavTap extends MainPageEvent {
-  final int index;
+  final NavBarIndex index;
 
   const OnBottomNavTap(this.index);
 
@@ -22,20 +22,11 @@ class OnAddToMyBagTap extends MainPageEvent {
   List<Object?> get props => [data];
 }
 
-class OnRemoveFromMyBagTap extends MainPageEvent {
-  final CardItemData data;
-
-  const OnRemoveFromMyBagTap(this.data);
-
-  @override
-  List<Object?> get props => [data];
-}
-
 class OnChangeCountToMyBagItemTap extends MainPageEvent {
   final String tagBox;
   final bool isAdd;
 
-  const OnChangeCountToMyBagItemTap(this.tagBox, this.isAdd);
+  const OnChangeCountToMyBagItemTap(this.tagBox, {required this.isAdd});
 
   @override
   List<Object?> get props => [tagBox];

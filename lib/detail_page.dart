@@ -77,6 +77,7 @@ class DetailPage extends StatelessWidget {
             child: ImagePngWithShadow(
               assetUrl: data.assetUrl,
               tag: data.tagImage,
+              degree: 12,
             ),
           ),
           SizedBox(
@@ -115,7 +116,7 @@ class _AddToBagButton extends StatelessWidget {
       builder: (context, state) {
         if (state is MainPageBaseState) {
           final isAddedToBag =
-              state.myBagList.where((e) => e.cardItemData.tagBox == data.tagBox).isNotEmpty;
+              state.myBagListSet.where((e) => e.cardItemData.tagBox == data.tagBox).isNotEmpty;
           return Padding(
             padding: const EdgeInsets.only(left: 16, right: 16, bottom: 8),
             child: Material(
@@ -124,9 +125,7 @@ class _AddToBagButton extends StatelessWidget {
               child: InkWell(
                 borderRadius: const BorderRadius.all(Radius.circular(6)),
                 onTap: () {
-                  if (isAddedToBag) {
-                    _bloc(context).add(OnRemoveFromMyBagTap(data));
-                  } else {
+                  if (!isAddedToBag) {
                     _bloc(context).add(OnAddToMyBagTap(data));
                   }
                 },
@@ -136,7 +135,7 @@ class _AddToBagButton extends StatelessWidget {
                     children: [
                       Expanded(
                         child: Text(
-                          isAddedToBag ? 'REMOVE' : 'ADD TO BAG',
+                          isAddedToBag ? 'Added' : 'ADD TO BAG',
                           textAlign: TextAlign.center,
                           style: const TextStyle(color: Colors.white),
                         ),

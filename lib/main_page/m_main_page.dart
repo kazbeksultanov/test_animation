@@ -1,17 +1,39 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 
+enum MyBagItemState { toBeAdd, add, remove, set }
+
+// extension MyBagItemStateExt on MyBagItemState {
+//   AnimationAction toAction() {
+//     switch (this) {
+//       case MyBagItemState.toBeAdd:
+//       case MyBagItemState.add:
+//       case MyBagItemState.set:
+//         return AnimationAction.appear;
+//       case MyBagItemState.remove:
+//         return AnimationAction.disappear;
+//     }
+//   }
+// }
+
 class MyBagItem extends Equatable {
   final CardItemData cardItemData;
   final int count;
+  final MyBagItemState state;
 
   const MyBagItem({
     required this.cardItemData,
     required this.count,
+    required this.state,
   });
 
   @override
-  List<Object?> get props => [cardItemData, count];
+  List<Object?> get props => [cardItemData, count, state];
+
+  @override
+  String toString() {
+    return 'MyBagItem(cardItemData.tagBox: ${cardItemData.tagBox}, state:$state, count:$count)';
+  }
 }
 
 class CardItemData extends Equatable {
