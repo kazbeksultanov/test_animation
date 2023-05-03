@@ -366,19 +366,20 @@ class _CardItem extends StatelessWidget {
     BuildContext fromHeroContext,
     BuildContext toHeroContext,
   ) {
-    final hBackground = (MediaQuery.of(fromHeroContext).size.height * 1.8) / 2.8;
+    final hBackground = (MediaQuery.of(fromHeroContext).size.height * 1.7) / 2.8;
     final tw = flightDirection == HeroFlightDirection.push
-        ? Tween<double>(begin: 26, end: hBackground)
-        : Tween<double>(begin: hBackground, end: 26);
+        ? Tween<double>(begin: 0, end: 1)
+        : Tween<double>(begin: 1, end: 0);
     tw.animate(animation);
     return TweenAnimationBuilder(
       tween: tw,
       duration: const Duration(milliseconds: 300),
       builder: (_, value, __) {
         return Container(
+          margin: EdgeInsets.all(16 * (1 - value)),
           decoration: BoxDecoration(
             color: data.color,
-            borderRadius: BorderRadius.all(Radius.circular(value)),
+            borderRadius: BorderRadius.all(Radius.circular(26 + value * hBackground)),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withOpacity(0.1),
