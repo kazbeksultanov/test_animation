@@ -124,8 +124,9 @@ class MainPageBloc extends Bloc<MainPageEvent, MainPageState> {
         result.add(myBagItem);
       }
     }
+    final currentStateNew = state as MainPageBaseState;
     emit(MainPageBaseState(
-      indexNavBar: currentState.indexNavBar,
+      indexNavBar: currentStateNew.indexNavBar,
       myBagListSet: result,
       reset: true,
     ));

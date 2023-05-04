@@ -3,19 +3,6 @@ import 'package:flutter/material.dart';
 
 enum MyBagItemState { toBeAdd, add, remove, set }
 
-// extension MyBagItemStateExt on MyBagItemState {
-//   AnimationAction toAction() {
-//     switch (this) {
-//       case MyBagItemState.toBeAdd:
-//       case MyBagItemState.add:
-//       case MyBagItemState.set:
-//         return AnimationAction.appear;
-//       case MyBagItemState.remove:
-//         return AnimationAction.disappear;
-//     }
-//   }
-// }
-
 class MyBagItem extends Equatable {
   final CardItemData cardItemData;
   final int count;
@@ -133,14 +120,6 @@ const cardList = <CardItemData>[
     shortInfo:
         r"Embrace Swoosh heritage when you step out in these men's Air Max 270 sneakers from Nike. Τhese running-inspired kicks have a breathable mesh and lightweight synthetic upper for a classic look and feel. They feature a low-cut, padded ankle collar, as well as a tonal lace-up front and a heel pull for easy on-and-off. Underfoot, a soft foam midsole combines with 270 degrees of visisble Air cushioning for an ultra-plush, responsive ride. With a grippy rubber outsole for street-ready traction, these trainers are finished off with signature Swoosh and Air Max branding throughout.",
   ),
-  // CardItemData(
-  //   id: '5',
-  //   color: Colors.brown,
-  //   assetUrl: 'images/sneaker_01.png',
-  //   brandName: 'NIKE',
-  //   cost: r'$90',
-  //   model: 'EPIC-MAX',
-  // ),
 ];
 
 const brandTypes = ['Upcoming', 'Featured', 'New'];
