@@ -1,16 +1,7 @@
 # test_animation
 
-A new Flutter project.
+Test task focused on animation implementing given [design](https://dribbble.com/shots/6733935-Bright-App-UI-Kit).
 
-## Getting Started
+In this example, I focused on animation, and tried to exactly as it is given in the design. 
+I did not pay too much attention to state management and architectural side. If you want to check architecture and development part, offer to look to my mini [WeatherApp](https://github.com/kazbeksultanov/weather_app).
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
