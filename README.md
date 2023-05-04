@@ -5,8 +5,6 @@ Test task focused on animation implementing given [design](https://dribbble.com/
 In this example, I focused on animation, and tried to exactly as it is given in the design. 
 I did not pay too much attention to state management and architectural side. If you want to check architecture and development part, offer to look to my mini [WeatherApp](https://github.com/kazbeksultanov/weather_app).
 
-## [Demo Video](https://drive.google.com/file/d/1dC0724VuazaGGzfH4wLpt6FD1tOn8ix4/view)
-
 ## Screenshots
 
 <table>
@@ -27,3 +25,7 @@ I did not pay too much attention to state management and architectural side. If 
     <th scope="row">My Bag page</th>
   </tr>
 </table>
+
+## [Demo Video](https://drive.google.com/file/d/1dC0724VuazaGGzfH4wLpt6FD1tOn8ix4/view)
+  
+<img src="https://user-images.githubusercontent.com/17141647/236176392-54c4685c-4b0e-4b1f-addb-8150a9a960b0.gif" width="200">
