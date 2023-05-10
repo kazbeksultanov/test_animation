@@ -4,9 +4,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:test_animation/common/widgets/image_png_with_shadow.dart';
-import 'package:test_animation/detail_page.dart';
-import 'package:test_animation/main_page/bloc/main_page_bloc.dart';
-import 'package:test_animation/main_page/m_main_page.dart';
+import 'package:test_animation/pages/detail_page/ui_detail_page.dart';
+import 'package:test_animation/pages/main_page/bloc/main_page_bloc.dart';
+import 'package:test_animation/pages/main_page/m_main_page.dart';
 
 const oneDegree = pi / 180;
 
@@ -51,6 +51,7 @@ class Tab1Discover extends StatelessWidget {
                 );
               },
             ),
+            const SizedBox(width: 8),
           ],
         ),
         const SizedBox(height: 12),
@@ -414,16 +415,16 @@ class _CardItemTransform extends StatelessWidget {
     if (dif >= 0) {
       // Right-Center movement
       final xPos = dif;
-      final scale = 0.4 * xPos * xPos - 0.5 * xPos + 1;
-      final angle = (125 * xPos - 125 * xPos * xPos) * oneDegree;
+      final scaleCard = 0.4 * xPos * xPos - 0.5 * xPos + 1;
+      final angleCard = (125 * xPos - 125 * xPos * xPos) * oneDegree;
       return Stack(
         children: [
           Transform.scale(
-            scale: scale,
+            scale: scaleCard,
             child: Transform(
               transform: Matrix4.identity()
                 ..setEntry(3, 2, 0.001)
-                ..rotateY(angle),
+                ..rotateY(angleCard),
               alignment: FractionalOffset.center,
               child: child,
             ),
@@ -440,8 +441,8 @@ class _CardItemTransform extends StatelessWidget {
     } else {
       // Center-Left movement
       final xPos = dif.abs();
-      final angle = -(65.5 * xPos - 65.5 * xPos * xPos) * oneDegree;
-      final scale = 0.08 * xPos * xPos - 0.08 * xPos + 1;
+      final angleCard = -(65.5 * xPos - 65.5 * xPos * xPos) * oneDegree;
+      final scaleCard = 0.08 * xPos * xPos - 0.08 * xPos + 1;
       final offset = Offset(-xPos * 100, 0);
       return Stack(
         children: [
@@ -449,11 +450,11 @@ class _CardItemTransform extends StatelessWidget {
             offset: offset,
             child: Transform.scale(
               alignment: Alignment.centerRight,
-              scale: scale,
+              scale: scaleCard,
               child: Transform(
                 transform: Matrix4.identity()
                   ..setEntry(3, 2, 0.001)
-                  ..rotateY(angle),
+                  ..rotateY(angleCard),
                 child: child,
               ),
             ),

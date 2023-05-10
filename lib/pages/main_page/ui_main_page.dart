@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:test_animation/main_page/bloc/main_page_bloc.dart';
+import 'package:test_animation/pages/main_page/bloc/main_page_bloc.dart';
 import 'package:test_animation/tabs/tab1_discover.dart';
 import 'package:test_animation/tabs/tab2_favourite.dart';
 import 'package:test_animation/tabs/tab3_my_location.dart';
@@ -9,32 +9,37 @@ import 'package:test_animation/tabs/tab5_profile.dart';
 
 MainPageBloc _bloc(BuildContext context) => BlocProvider.of(context);
 
-class DiscoverPageProvider extends StatelessWidget {
-  const DiscoverPageProvider({super.key});
+class MainPageProvider extends StatelessWidget {
+  const MainPageProvider({super.key});
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => MainPageBloc(),
-      child: const DiscoverPage(),
+      child: const MainPage(),
     );
   }
 }
 
-class DiscoverPage extends StatelessWidget {
-  const DiscoverPage({super.key});
+class MainPage extends StatelessWidget {
+  const MainPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final screenSize = MediaQuery.of(context).size;
+    final screenWidth = screenSize.width;
+    final screenHeight = screenSize.height;
+    final circleD = screenWidth * 3;
+
     return Stack(
       children: [
         Container(color: Colors.grey.shade200),
         Positioned(
-          bottom: 80,
-          left: -250,
+          bottom: screenHeight / 8,
+          left: -(circleD - screenWidth) / 2,
           child: Container(
-            height: 900,
-            width: 900,
+            height: circleD,
+            width: circleD,
             decoration: const BoxDecoration(
               color: Colors.white,
               shape: BoxShape.circle,

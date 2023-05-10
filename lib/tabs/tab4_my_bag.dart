@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:test_animation/main_page/bloc/main_page_bloc.dart';
-import 'package:test_animation/main_page/m_main_page.dart';
+import 'package:test_animation/pages/main_page/bloc/main_page_bloc.dart';
+import 'package:test_animation/pages/main_page/m_main_page.dart';
 
 MainPageBloc _bloc(BuildContext context) => BlocProvider.of(context);
 

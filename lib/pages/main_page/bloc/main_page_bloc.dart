@@ -1,6 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:test_animation/main_page/m_main_page.dart';
+import 'package:test_animation/pages/main_page/m_main_page.dart';
 
 part 'main_page_event.dart';
 part 'main_page_state.dart';
